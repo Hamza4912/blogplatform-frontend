@@ -22,6 +22,7 @@ function Login() {
     localStorage.setItem("token", response.data.accessToken);
     localStorage.setItem("username", response.data.username);
     localStorage.setItem("role", response.data.role);
+    localStorage.setItem("refreshToken", response.data.refreshToken);
 
     navigate("/blogs"); // abhi ye page nahi bana, thodi der mein banayenge
     console.log("Login success! Token saved.");
