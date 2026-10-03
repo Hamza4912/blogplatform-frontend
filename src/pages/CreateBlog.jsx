@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
 
 function CreateBlog() {
@@ -18,9 +19,10 @@ function CreateBlog() {
         setCategories(response.data);
       } catch (err) {
         console.error(err);
-        setError("Categories load nahi ho sakin.");
+        setError("Failed to load categories.");
       }
     };
+
     fetchCategories();
   }, []);
 
@@ -35,10 +37,11 @@ function CreateBlog() {
         categoryId: Number(categoryId),
       });
 
+      toast.success("Blog published successfully!");
       navigate("/blogs");
     } catch (err) {
       console.error(err);
-      setError("Blog create nahi hua. Dubara try karo.");
+      setError("Failed to create blog. Please try again.");
     }
   };
 
@@ -65,8 +68,8 @@ function CreateBlog() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            rows="8"
             style={{ width: "100%" }}
+            rows="8"
             required
           />
         </div>

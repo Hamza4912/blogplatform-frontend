@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
+import ConfirmModal from "../components/ConfirmModal";
 
 function BlogList() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -14,7 +17,7 @@ function BlogList() {
         setBlogs(response.data.items);
       } catch (err) {
         console.error(err);
-        setError("Blogs load nahi ho sake.");
+        setError("Failed to load blogs.");
       } finally {
         setLoading(false);
       }
@@ -23,48 +26,63 @@ function BlogList() {
     fetchBlogs();
   }, []);
 
- const handleDelete = async (blogId) => {
-  const confirmDelete = window.confirm("Kya tum ye blog delete karna chahte ho?");
-  if (!confirmDelete) return;
+  const confirmDelete = async () => {
+    const blogId = deleteTargetId;
+    setDeleteTargetId(null);
 
-  const role = localStorage.getItem("role");
-  const endpoint = role === "Admin" ? `/Admin/blogs/${blogId}` : `/Blog/${blogId}`;
+    const role = localStorage.getItem("role");
+    const endpoint = role === "Admin" ? `/Admin/blogs/${blogId}` : `/Blog/${blogId}`;
 
-  try {
-    await api.delete(endpoint);
-    setBlogs(blogs.filter((blog) => blog.id !== blogId));
-  } catch (err) {
-    console.error(err);
-    alert("Delete nahi hua. Shayad ye tumhara blog nahi hai.");
-  }
-};
+    try {
+      await api.delete(endpoint);
+      setBlogs(blogs.filter((blog) => blog.id !== blogId));
+      toast.success("Blog deleted.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed. You may not have permission.");
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+  const currentUserId = Number(localStorage.getItem("userId"));
+  const role = localStorage.getItem("role");
+
   return (
     <div style={{ maxWidth: "600px", margin: "50px auto" }}>
       <h2>All Blogs</h2>
-      {blogs.length === 0 && <p>Koi blog nahi mila.</p>}
+      {blogs.length === 0 && <p>No blogs found.</p>}
       {blogs.map((blog) => (
         <div
           key={blog.id}
           style={{ border: "1px solid #ccc", padding: "15px", marginBottom: "10px" }}
         >
           <h3>
-  <Link to={`/blog/${blog.id}`}>{blog.title}</Link>
-</h3>
+            <Link to={`/blog/${blog.id}`}>{blog.title}</Link>
+          </h3>
           <p>{blog.content}</p>
           <small>
             By {blog.authorName} in {blog.categoryName}
           </small>
           <br />
-          <Link to={`/edit-blog/${blog.id}`} style={{ marginRight: "10px" }}>
-            Edit
-          </Link>
-          <button onClick={() => handleDelete(blog.id)}>Delete</button>
+          {currentUserId === blog.userId && (
+            <Link to={`/edit-blog/${blog.id}`} style={{ marginRight: "10px" }}>
+              Edit
+            </Link>
+          )}
+          {(currentUserId === blog.userId || role === "Admin") && (
+            <button onClick={() => setDeleteTargetId(blog.id)}>Delete</button>
+          )}
         </div>
       ))}
+
+      <ConfirmModal
+        show={deleteTargetId !== null}
+        message="Are you sure you want to delete this blog?"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTargetId(null)}
+      />
     </div>
   );
 }

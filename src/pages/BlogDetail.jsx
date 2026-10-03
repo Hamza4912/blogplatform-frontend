@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
+import ConfirmModal from "../components/ConfirmModal";
 
 function BlogDetail() {
   const { id } = useParams();
@@ -9,10 +11,14 @@ function BlogDetail() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
-const [likesCount, setLikesCount] = useState(0);
-const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [liked, setLiked] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
+
+  const currentUserId = Number(localStorage.getItem("userId"));
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -21,7 +27,7 @@ const [liked, setLiked] = useState(false);
         setBlog(response.data);
       } catch (err) {
         console.error(err);
-        setError("Blog load nahi hua.");
+        setError("Failed to load blog.");
       }
     };
 
@@ -33,18 +39,19 @@ const [liked, setLiked] = useState(false);
         console.error(err);
       }
     };
+
     const fetchLikes = async () => {
-  try {
-    const response = await api.get(`/Blog/${id}/likes`);
-    setLikesCount(response.data.likes);
-  } catch (err) {
-    console.error(err);
-  }
-};
+      try {
+        const response = await api.get(`/Blog/${id}/likes`);
+        setLikesCount(response.data.likes);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
     fetchBlog();
     fetchComments();
-    fetchLikes(); 
+    fetchLikes();
   }, [id]);
 
   const handleCommentSubmit = async (e) => {
@@ -57,9 +64,10 @@ const [liked, setLiked] = useState(false);
 
       setComments([...comments, response.data]);
       setNewComment("");
+      toast.success("Comment posted.");
     } catch (err) {
       console.error(err);
-      setError("Comment post nahi hua.");
+      setError("Failed to post comment.");
     }
   };
 
@@ -79,43 +87,46 @@ const [liked, setLiked] = useState(false);
       );
 
       setEditingId(null);
+      toast.success("Comment updated.");
     } catch (err) {
       console.error(err);
-      alert("Update nahi hua. Shayad ye tumhara comment nahi hai.");
+      toast.error("Update failed. You may not have permission.");
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-  const confirmDelete = window.confirm("Comment delete karna hai?");
-  if (!confirmDelete) return;
+  const confirmDeleteComment = async () => {
+    const commentId = deleteTargetId;
+    setDeleteTargetId(null);
 
-  const role = localStorage.getItem("role");
-  const endpoint = role === "Admin" ? `/Admin/comments/${commentId}` : `/comments/${commentId}`;
+    const endpoint = role === "Admin" ? `/Admin/comments/${commentId}` : `/comments/${commentId}`;
 
-  try {
-    await api.delete(endpoint);
-    setComments(comments.filter((c) => c.id !== commentId));
-  } catch (err) {
-    console.error(err);
-    alert("Delete nahi hua. Shayad ye tumhara comment nahi hai.");
-  }
-};
-const handleLikeToggle = async () => {
-  try {
-    if (liked) {
-      await api.delete(`/Blog/${id}/like`);
-      setLikesCount(likesCount - 1);
-      setLiked(false);
-    } else {
-      await api.post(`/Blog/${id}/like`);
-      setLikesCount(likesCount + 1);
-      setLiked(true);
+    try {
+      await api.delete(endpoint);
+      setComments(comments.filter((c) => c.id !== commentId));
+      toast.success("Comment deleted.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed. You may not have permission.");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Kuch masla hua like/unlike karne mein.");
-  }
-};
+  };
+
+  const handleLikeToggle = async () => {
+    try {
+      if (liked) {
+        await api.delete(`/Blog/${id}/like`);
+        setLikesCount(likesCount - 1);
+        setLiked(false);
+      } else {
+        await api.post(`/Blog/${id}/like`);
+        setLikesCount(likesCount + 1);
+        setLiked(true);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong while liking/unliking.");
+    }
+  };
+
   if (!blog) return <p>Loading...</p>;
 
   return (
@@ -125,13 +136,15 @@ const handleLikeToggle = async () => {
       <small>
         By {blog.authorName} in {blog.categoryName}
       </small>
-<button onClick={handleLikeToggle}>
-  {liked ? "Unlike" : "Like"} ({likesCount})
-</button>
+      <br />
+      <button onClick={handleLikeToggle}>
+        {liked ? "Unlike" : "Like"} ({likesCount})
+      </button>
+
       <hr />
 
       <h3>Comments</h3>
-      {comments.length === 0 && <p>Koi comment nahi hai abhi.</p>}
+      {comments.length === 0 && <p>No comments yet.</p>}
       {comments.map((comment) => (
         <div
           key={comment.id}
@@ -156,10 +169,14 @@ const handleLikeToggle = async () => {
           ) : (
             <div>
               <p>{comment.text}</p>
-              <button onClick={() => handleEditClick(comment)}>Edit</button>
-              <button onClick={() => handleDeleteComment(comment.id)}>
-                Delete
-              </button>
+              {currentUserId === comment.userId && (
+                <button onClick={() => handleEditClick(comment)}>Edit</button>
+              )}
+              {(currentUserId === comment.userId || role === "Admin") && (
+                <button onClick={() => setDeleteTargetId(comment.id)}>
+                  Delete
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -169,7 +186,7 @@ const handleLikeToggle = async () => {
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Comment likho..."
+          placeholder="Write a comment..."
           style={{ width: "100%" }}
           rows="3"
           required
@@ -178,6 +195,13 @@ const handleLikeToggle = async () => {
         <button type="submit">Post Comment</button>
         {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
+
+      <ConfirmModal
+        show={deleteTargetId !== null}
+        message="Delete this comment?"
+        onConfirm={confirmDeleteComment}
+        onCancel={() => setDeleteTargetId(null)}
+      />
     </div>
   );
 }

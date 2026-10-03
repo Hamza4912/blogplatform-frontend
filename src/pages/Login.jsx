@@ -1,36 +1,41 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    const response = await api.post("/Auth/login", {
-      email: email,
-      password: password,
-    });
+    try {
+      const response = await api.post("/Auth/login", {
+        email: email,
+        password: password,
+      });
 
-    localStorage.setItem("token", response.data.accessToken);
-    localStorage.setItem("username", response.data.username);
-    localStorage.setItem("role", response.data.role);
-    localStorage.setItem("refreshToken", response.data.refreshToken);
+      localStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+      localStorage.setItem("username", response.data.username);
+      localStorage.setItem("role", response.data.role);
 
-    navigate("/blogs"); // abhi ye page nahi bana, thodi der mein banayenge
-    console.log("Login success! Token saved.");
-  } catch (err) {
-    console.error(err);
-    setError("Login failed. Email ya password check karo.");
-  }
-};
+      const meResponse = await api.get("/User/me");
+      localStorage.setItem("userId", meResponse.data.id);
+
+      toast.success("Welcome back!");
+      navigate("/blogs");
+    } catch (err) {
+      console.error(err);
+      setError("Login failed. Please check your email and password.");
+    }
+  };
+
   return (
     <div style={{ maxWidth: "300px", margin: "50px auto" }}>
       <h2>Login</h2>
@@ -60,9 +65,9 @@ function Login() {
         <button type="submit">Login</button>
         {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
-    <p>
-  Account nahi hai? <Link to="/register">Register karo</Link>
-</p>
+      <p>
+        Don't have an account? <Link to="/register">Register here</Link>
+      </p>
     </div>
   );
 }

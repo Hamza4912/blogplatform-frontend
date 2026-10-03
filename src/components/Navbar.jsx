@@ -7,19 +7,20 @@ function Navbar() {
   const role = localStorage.getItem("role");
 
   const handleLogout = async () => {
-  try {
-    const refreshToken = localStorage.getItem("refreshToken");
-    await api.post("/Auth/logout", { refreshToken });
-  } catch (err) {
-    console.error(err);
-  }
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      await api.post("/Auth/logout", { refreshToken });
+    } catch (err) {
+      console.error(err);
+    }
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("username");
-  localStorage.removeItem("role");
-  navigate("/login");
-};
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userId");
+    navigate("/login");
+  };
 
   return (
     <nav
@@ -32,22 +33,29 @@ function Navbar() {
       }}
     >
       <div>
-        <Link to="/blogs" style={{ marginRight: "15px" }}>
-          All Blogs
-        </Link>
-        <Link to="/create-blog" style={{ marginRight: "15px" }}>
-  Write Blog
-</Link>
-        <Link to="/profile" style={{ marginRight: "15px" }}>
-          Profile
-        </Link>
-        <Link to="/categories" style={{ marginRight: "15px" }}>
-  Categories
-</Link>
-        {role === "Admin" && (
-          <Link to="/admin" style={{ marginRight: "15px" }}>
-            Admin Panel
-          </Link>
+        {username && (
+          <>
+            <Link to="/blogs" style={{ marginRight: "15px" }}>
+              All Blogs
+            </Link>
+            <Link to="/create-blog" style={{ marginRight: "15px" }}>
+              Write Blog
+            </Link>
+            <Link to="/dashboard" style={{ marginRight: "15px" }}>
+              Dashboard
+            </Link>
+            <Link to="/categories" style={{ marginRight: "15px" }}>
+              Categories
+            </Link>
+            <Link to="/profile" style={{ marginRight: "15px" }}>
+              Profile
+            </Link>
+            {role === "Admin" && (
+              <Link to="/admin" style={{ marginRight: "15px" }}>
+                Admin Panel
+              </Link>
+            )}
+          </>
         )}
       </div>
 

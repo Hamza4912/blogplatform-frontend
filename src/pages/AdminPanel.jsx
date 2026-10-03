@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import api from "../services/api";
+import ConfirmModal from "../components/ConfirmModal";
 
 function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
+  const [deactivateTargetId, setDeactivateTargetId] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -13,7 +16,7 @@ function AdminPanel() {
         setUsers(response.data);
       } catch (err) {
         console.error(err);
-        setError("Users load nahi hue.");
+        setError("Failed to load users.");
       }
     };
 
@@ -36,43 +39,36 @@ function AdminPanel() {
         role: newRole,
       });
 
-      setUsers(
-        users.map((u) => (u.id === userId ? response.data : u))
-      );
+      setUsers(users.map((u) => (u.id === userId ? response.data : u)));
+      toast.success("Role updated.");
     } catch (err) {
       console.error(err);
-      alert("Role update nahi hua.");
+      toast.error("Failed to update role.");
     }
   };
 
-  const handleDeactivate = async (userId) => {
-    const confirmDeactivate = window.confirm("Is user ko deactivate karna hai?");
-    if (!confirmDeactivate) return;
+  const confirmDeactivate = async () => {
+    const userId = deactivateTargetId;
+    setDeactivateTargetId(null);
 
     try {
       const response = await api.put(`/Admin/users/${userId}/deactivate`);
-
-      setUsers(
-        users.map((u) => (u.id === userId ? response.data : u))
-      );
+      setUsers(users.map((u) => (u.id === userId ? response.data : u)));
+      toast.success("User deactivated.");
     } catch (err) {
       console.error(err);
-      alert("Deactivate nahi hua. Shayad already deactivated hai.");
+      toast.error("Deactivation failed. User may already be inactive.");
     }
   };
-  const handleActivate = async (userId) => {
-    const confirmActivate = window.confirm("Is user ko activate karna hai?");
-    if (!confirmActivate) return;
 
+  const handleActivate = async (userId) => {
     try {
       const response = await api.put(`/Admin/users/${userId}/activate`);
-
-      setUsers(
-        users.map((u) => (u.id === userId ? response.data : u))
-      );
+      setUsers(users.map((u) => (u.id === userId ? response.data : u)));
+      toast.success("User activated.");
     } catch (err) {
       console.error(err);
-      alert("Activate nahi hua. Shayad already activated hai.");
+      toast.error("Activation failed.");
     }
   };
 
@@ -136,13 +132,11 @@ function AdminPanel() {
                   </button>
                 )}
                 {" "}
-                {user.isActive && (
-                  <button onClick={() => handleDeactivate(user.id)}>
+                {user.isActive ? (
+                  <button onClick={() => setDeactivateTargetId(user.id)}>
                     Deactivate
                   </button>
-                )
-                }
-                {!user.isActive && (
+                ) : (
                   <button onClick={() => handleActivate(user.id)}>
                     Activate
                   </button>
@@ -152,6 +146,13 @@ function AdminPanel() {
           ))}
         </tbody>
       </table>
+
+      <ConfirmModal
+        show={deactivateTargetId !== null}
+        message="Deactivate this user?"
+        onConfirm={confirmDeactivate}
+        onCancel={() => setDeactivateTargetId(null)}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
 
 function EditBlog() {
@@ -24,7 +25,7 @@ function EditBlog() {
         setCategoryId(blogResponse.data.categoryId);
       } catch (err) {
         console.error(err);
-        setError("Data load nahi hui.");
+        setError("Failed to load data.");
       }
     };
 
@@ -42,10 +43,11 @@ function EditBlog() {
         categoryId: Number(categoryId),
       });
 
+      toast.success("Blog updated successfully!");
       navigate("/blogs");
     } catch (err) {
       console.error(err);
-      setError("Update nahi hua. Shayad ye tumhara blog nahi hai.");
+      setError("Update failed. You may not have permission.");
     }
   };
 

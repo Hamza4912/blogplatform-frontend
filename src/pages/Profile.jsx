@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import api from "../services/api";
 
 function Profile() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [profileError, setProfileError] = useState("");
-  const [profileSuccess, setProfileSuccess] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -20,7 +19,7 @@ function Profile() {
         setEmail(response.data.email);
       } catch (err) {
         console.error(err);
-        setProfileError("Profile load nahi hua.");
+        setProfileError("Failed to load profile.");
       }
     };
 
@@ -30,7 +29,6 @@ function Profile() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setProfileError("");
-    setProfileSuccess("");
 
     try {
       await api.put("/User/profile", {
@@ -38,18 +36,17 @@ function Profile() {
         email: email,
       });
 
-      setProfileSuccess("Profile update ho gaya.");
+      toast.success("Profile updated successfully.");
       localStorage.setItem("username", username);
     } catch (err) {
       console.error(err);
-      setProfileError("Profile update nahi hua.");
+      setProfileError("Failed to update profile.");
     }
   };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setPasswordError("");
-    setPasswordSuccess("");
 
     try {
       await api.put("/User/change-password", {
@@ -57,12 +54,12 @@ function Profile() {
         newPassword: newPassword,
       });
 
-      setPasswordSuccess("Password change ho gaya.");
+      toast.success("Password changed successfully.");
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
       console.error(err);
-      setPasswordError("Password change nahi hua. Current password check karo.");
+      setPasswordError("Failed to change password. Please check your current password.");
     }
   };
 
@@ -97,7 +94,6 @@ function Profile() {
         <br />
         <button type="submit">Update Profile</button>
         {profileError && <p style={{ color: "red" }}>{profileError}</p>}
-        {profileSuccess && <p style={{ color: "green" }}>{profileSuccess}</p>}
       </form>
 
       <hr style={{ margin: "30px 0" }} />
@@ -130,7 +126,6 @@ function Profile() {
         <br />
         <button type="submit">Change Password</button>
         {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
-        {passwordSuccess && <p style={{ color: "green" }}>{passwordSuccess}</p>}
       </form>
     </div>
   );

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import api from "../services/api";
+import ConfirmModal from "../components/ConfirmModal";
 
 function Categories() {
   const [categories, setCategories] = useState([]);
@@ -11,6 +13,8 @@ function Categories() {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -21,7 +25,7 @@ function Categories() {
       setCategories(response.data);
     } catch (err) {
       console.error(err);
-      setError("Categories load nahi hui.");
+      setError("Failed to load categories.");
     }
   };
 
@@ -34,9 +38,10 @@ function Categories() {
       setName("");
       setDescription("");
       fetchCategories();
+      toast.success("Category created.");
     } catch (err) {
       console.error(err);
-      setError("Category create nahi hui.");
+      setError("Failed to create category.");
     }
   };
 
@@ -54,22 +59,24 @@ function Categories() {
       });
       setEditingId(null);
       fetchCategories();
+      toast.success("Category updated.");
     } catch (err) {
       console.error(err);
-      alert("Update nahi hua.");
+      toast.error("Update failed.");
     }
   };
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Category delete karni hai?");
-    if (!confirmDelete) return;
+  const confirmDelete = async () => {
+    const id = deleteTargetId;
+    setDeleteTargetId(null);
 
     try {
       await api.delete(`/Category/${id}`);
       setCategories(categories.filter((c) => c.id !== id));
+      toast.success("Category deleted.");
     } catch (err) {
       console.error(err);
-      alert("Delete nahi hua. Shayad is category mein blogs hain.");
+      toast.error("Delete failed. This category may still have blogs.");
     }
   };
 
@@ -131,11 +138,18 @@ function Categories() {
               <strong>{cat.name}</strong>
               <p>{cat.description}</p>
               <button onClick={() => handleEditClick(cat)}>Edit</button>
-              <button onClick={() => handleDelete(cat.id)}>Delete</button>
+              <button onClick={() => setDeleteTargetId(cat.id)}>Delete</button>
             </div>
           )}
         </div>
       ))}
+
+      <ConfirmModal
+        show={deleteTargetId !== null}
+        message="Delete this category?"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTargetId(null)}
+      />
     </div>
   );
 }

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
 
 function Register() {
@@ -6,12 +8,10 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     try {
       await api.post("/Auth/register", {
@@ -20,10 +20,13 @@ function Register() {
         password: password,
       });
 
-      setSuccess("Registration successful! Ab login karo.");
+      toast.success("Registration successful! Please log in.");
+      setUsername("");
+      setEmail("");
+      setPassword("");
     } catch (err) {
       console.error(err);
-      setError("Registration failed. Dubara try karo.");
+      setError("Registration failed. Please try again.");
     }
   };
 
@@ -66,8 +69,10 @@ function Register() {
         <br />
         <button type="submit">Register</button>
         {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
       </form>
+      <p>
+        Already have an account? <Link to="/login">Login here</Link>
+      </p>
     </div>
   );
 }
