@@ -7,6 +7,8 @@ import CreateBlog from "./pages/CreateBlog";
 import EditBlog from "./pages/EditBlog";
 import BlogDetail from "./pages/BlogDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
+import AdminPanel from "./pages/AdminPanel";
 
 function App() {
   return (
@@ -49,6 +51,22 @@ function App() {
       </ProtectedRoute>
     }
   />
+  <Route
+    path="/profile"
+    element={
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/admin"
+    element={
+      <ProtectedRoute adminOnly={true}>
+        <AdminPanel />
+      </ProtectedRoute>
+  }
+/>
 </Routes>
     </div>
   );

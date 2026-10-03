@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 function Navbar() {
   const navigate = useNavigate();
   const username = localStorage.getItem("username");
+  const role = localStorage.getItem("role");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -25,6 +26,14 @@ function Navbar() {
         <Link to="/blogs" style={{ marginRight: "15px" }}>
           All Blogs
         </Link>
+        <Link to="/profile" style={{ marginRight: "15px" }}>
+          Profile
+        </Link>
+        {role === "Admin" && (
+          <Link to="/admin" style={{ marginRight: "15px" }}>
+            Admin Panel
+          </Link>
+        )}
       </div>
 
       <div>
