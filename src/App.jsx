@@ -9,6 +9,7 @@ import BlogDetail from "./pages/BlogDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import AdminPanel from "./pages/AdminPanel";
+import Categories from "./pages/Categories";
 
 function App() {
   return (
@@ -65,6 +66,15 @@ function App() {
       <ProtectedRoute adminOnly={true}>
         <AdminPanel />
       </ProtectedRoute>
+  }
+  
+/>
+<Route
+  path="/categories"
+  element={
+    <ProtectedRoute>
+      <Categories />
+    </ProtectedRoute>
   }
 />
 </Routes>

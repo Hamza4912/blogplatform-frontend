@@ -27,9 +27,15 @@ function Navbar() {
         <Link to="/blogs" style={{ marginRight: "15px" }}>
           All Blogs
         </Link>
+        <Link to="/create-blog" style={{ marginRight: "15px" }}>
+  Write Blog
+</Link>
         <Link to="/profile" style={{ marginRight: "15px" }}>
           Profile
         </Link>
+        <Link to="/categories" style={{ marginRight: "15px" }}>
+  Categories
+</Link>
         {role === "Admin" && (
           <Link to="/admin" style={{ marginRight: "15px" }}>
             Admin Panel
