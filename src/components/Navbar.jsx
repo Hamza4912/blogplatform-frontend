@@ -1,17 +1,25 @@
 import { Link, useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Navbar() {
   const navigate = useNavigate();
   const username = localStorage.getItem("username");
   const role = localStorage.getItem("role");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("role");
-    localStorage.removeItem("refreshToken");
-    navigate("/login");
-  };
+  const handleLogout = async () => {
+  try {
+    const refreshToken = localStorage.getItem("refreshToken");
+    await api.post("/Auth/logout", { refreshToken });
+  } catch (err) {
+    console.error(err);
+  }
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("username");
+  localStorage.removeItem("role");
+  navigate("/login");
+};
 
   return (
     <nav

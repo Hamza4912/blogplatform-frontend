@@ -86,17 +86,20 @@ const [liked, setLiked] = useState(false);
   };
 
   const handleDeleteComment = async (commentId) => {
-    const confirmDelete = window.confirm("Comment delete karna hai?");
-    if (!confirmDelete) return;
+  const confirmDelete = window.confirm("Comment delete karna hai?");
+  if (!confirmDelete) return;
 
-    try {
-      await api.delete(`/comments/${commentId}`);
-      setComments(comments.filter((c) => c.id !== commentId));
-    } catch (err) {
-      console.error(err);
-      alert("Delete nahi hua. Shayad ye tumhara comment nahi hai.");
-    }
-  };
+  const role = localStorage.getItem("role");
+  const endpoint = role === "Admin" ? `/Admin/comments/${commentId}` : `/comments/${commentId}`;
+
+  try {
+    await api.delete(endpoint);
+    setComments(comments.filter((c) => c.id !== commentId));
+  } catch (err) {
+    console.error(err);
+    alert("Delete nahi hua. Shayad ye tumhara comment nahi hai.");
+  }
+};
 const handleLikeToggle = async () => {
   try {
     if (liked) {

@@ -23,18 +23,21 @@ function BlogList() {
     fetchBlogs();
   }, []);
 
-  const handleDelete = async (blogId) => {
-    const confirmDelete = window.confirm("Kya tum ye blog delete karna chahte ho?");
-    if (!confirmDelete) return;
+ const handleDelete = async (blogId) => {
+  const confirmDelete = window.confirm("Kya tum ye blog delete karna chahte ho?");
+  if (!confirmDelete) return;
 
-    try {
-      await api.delete(`/Blog/${blogId}`);
-      setBlogs(blogs.filter((blog) => blog.id !== blogId));
-    } catch (err) {
-      console.error(err);
-      alert("Delete nahi hua. Shayad ye tumhara blog nahi hai.");
-    }
-  };
+  const role = localStorage.getItem("role");
+  const endpoint = role === "Admin" ? `/Admin/blogs/${blogId}` : `/Blog/${blogId}`;
+
+  try {
+    await api.delete(endpoint);
+    setBlogs(blogs.filter((blog) => blog.id !== blogId));
+  } catch (err) {
+    console.error(err);
+    alert("Delete nahi hua. Shayad ye tumhara blog nahi hai.");
+  }
+};
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
