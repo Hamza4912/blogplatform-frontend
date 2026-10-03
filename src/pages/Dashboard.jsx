@@ -1,47 +1,64 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
+import ConfirmModal from "../components/ConfirmModal";
 
 function Dashboard() {
   const [myBlogs, setMyBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   useEffect(() => {
-    const fetchMyDashboard = async () => {
-      try {
-        const username = localStorage.getItem("username");
-
-        const blogsResponse = await api.get("/Blog", {
-          params: { AuthorName: username, PageSize: 100 },
-        });
-
-        const blogs = blogsResponse.data.items;
-
-        const blogsWithStats = await Promise.all(
-          blogs.map(async (blog) => {
-            const [likesRes, commentsRes] = await Promise.all([
-              api.get(`/Blog/${blog.id}/likes`),
-              api.get(`/blog/${blog.id}/comments`),
-            ]);
-
-            return {
-              ...blog,
-              likesCount: likesRes.data.likes,
-              commentsCount: commentsRes.data.length,
-            };
-          })
-        );
-
-        setMyBlogs(blogsWithStats);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMyDashboard();
   }, []);
+
+  const fetchMyDashboard = async () => {
+    try {
+      const username = localStorage.getItem("username");
+
+      const blogsResponse = await api.get("/Blog", {
+        params: { AuthorName: username, PageSize: 100 },
+      });
+
+      const blogs = blogsResponse.data.items;
+
+      const blogsWithStats = await Promise.all(
+        blogs.map(async (blog) => {
+          const [likesRes, commentsRes] = await Promise.all([
+            api.get(`/Blog/${blog.id}/likes`),
+            api.get(`/blog/${blog.id}/comments`),
+          ]);
+
+          return {
+            ...blog,
+            likesCount: likesRes.data.likes,
+            commentsCount: commentsRes.data.length,
+          };
+        })
+      );
+
+      setMyBlogs(blogsWithStats);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    const blogId = deleteTargetId;
+    setDeleteTargetId(null);
+
+    try {
+      await api.delete(`/Blog/${blogId}`);
+      setMyBlogs(myBlogs.filter((b) => b.id !== blogId));
+      toast.success("Blog deleted.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed.");
+    }
+  };
 
   if (loading) return <p>Loading dashboard...</p>;
 
@@ -82,8 +99,20 @@ function Dashboard() {
           <small>
             {blog.likesCount} likes · {blog.commentsCount} comments · {blog.categoryName}
           </small>
+          <br />
+          <Link to={`/edit-blog/${blog.id}`} style={{ marginRight: "10px" }}>
+            Edit
+          </Link>
+          <button onClick={() => setDeleteTargetId(blog.id)}>Delete</button>
         </div>
       ))}
+
+      <ConfirmModal
+        show={deleteTargetId !== null}
+        message="Are you sure you want to delete this blog?"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTargetId(null)}
+      />
     </div>
   );
 }

@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 
 function AdminPanel() {
   const [users, setUsers] = useState([]);
+  const [blogs, setBlogs] = useState([]);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
   const [deactivateTargetId, setDeactivateTargetId] = useState(null);
+  const [deleteBlogTargetId, setDeleteBlogTargetId] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -29,8 +32,18 @@ function AdminPanel() {
       }
     };
 
+    const fetchBlogs = async () => {
+      try {
+        const response = await api.get("/Blog", { params: { PageSize: 100 } });
+        setBlogs(response.data.items);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchUsers();
     fetchStats();
+    fetchBlogs();
   }, []);
 
   const handleRoleChange = async (userId, newRole) => {
@@ -72,6 +85,20 @@ function AdminPanel() {
     }
   };
 
+  const confirmDeleteBlog = async () => {
+    const blogId = deleteBlogTargetId;
+    setDeleteBlogTargetId(null);
+
+    try {
+      await api.delete(`/Admin/blogs/${blogId}`);
+      setBlogs(blogs.filter((b) => b.id !== blogId));
+      toast.success("Blog deleted.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed.");
+    }
+  };
+
   return (
     <div style={{ maxWidth: "800px", margin: "50px auto" }}>
       <h2>Admin Panel</h2>
@@ -102,7 +129,7 @@ function AdminPanel() {
       <h3>Users</h3>
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px" }}>
         <thead>
           <tr>
             <th style={{ border: "1px solid #ccc", padding: "8px" }}>Username</th>
@@ -147,11 +174,34 @@ function AdminPanel() {
         </tbody>
       </table>
 
+      <h3>All Blogs</h3>
+      {blogs.map((blog) => (
+        <div
+          key={blog.id}
+          style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}
+        >
+          <strong>
+            <Link to={`/blog/${blog.id}`}>{blog.title}</Link>
+          </strong>
+          <br />
+          <small>By {blog.authorName} in {blog.categoryName}</small>
+          <br />
+          <button onClick={() => setDeleteBlogTargetId(blog.id)}>Delete</button>
+        </div>
+      ))}
+
       <ConfirmModal
         show={deactivateTargetId !== null}
         message="Deactivate this user?"
         onConfirm={confirmDeactivate}
         onCancel={() => setDeactivateTargetId(null)}
+      />
+
+      <ConfirmModal
+        show={deleteBlogTargetId !== null}
+        message="Delete this blog?"
+        onConfirm={confirmDeleteBlog}
+        onCancel={() => setDeleteBlogTargetId(null)}
       />
     </div>
   );
