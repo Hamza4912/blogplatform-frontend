@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../services/api";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 
 function EditBlog() {
   const { id } = useParams();
@@ -71,13 +73,12 @@ function EditBlog() {
         <div>
           <label>Content</label>
           <br />
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            style={{ width: "100%" }}
-            rows="6"
-            required
-          />
+          <ReactQuill
+  theme="snow"
+  value={content}
+  onChange={setContent}
+  style={{ backgroundColor: "#fff" }}
+/>
         </div>
         <br />
 

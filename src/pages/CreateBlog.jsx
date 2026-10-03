@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 import api from "../services/api";
 
 function CreateBlog() {
@@ -46,7 +48,7 @@ function CreateBlog() {
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "50px auto" }}>
+    <div style={{ maxWidth: "700px", margin: "50px auto" }}>
       <h2>Create Blog</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -64,13 +66,11 @@ function CreateBlog() {
 
         <div>
           <label>Content</label>
-          <br />
-          <textarea
+          <ReactQuill
+            theme="snow"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            style={{ width: "100%" }}
-            rows="8"
-            required
+            onChange={setContent}
+            style={{ backgroundColor: "#fff" }}
           />
         </div>
         <br />

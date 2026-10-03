@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
+import DOMPurify from "dompurify";
 
 function BlogDetail() {
   const { id } = useParams();
@@ -132,7 +133,9 @@ function BlogDetail() {
   return (
     <div style={{ maxWidth: "600px", margin: "50px auto" }}>
       <h2>{blog.title}</h2>
-      <p>{blog.content}</p>
+      <div
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
+/>
       <small>
         By {blog.authorName} in {blog.categoryName}
       </small>

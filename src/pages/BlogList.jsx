@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
+import DOMPurify from "dompurify";
 
 function BlogList() {
   const [blogs, setBlogs] = useState([]);
@@ -61,7 +62,9 @@ function BlogList() {
           <h3>
             <Link to={`/blog/${blog.id}`}>{blog.title}</Link>
           </h3>
-          <p>{blog.content}</p>
+          <div
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
+          />
           <small>
             By {blog.authorName} in {blog.categoryName}
           </small>
