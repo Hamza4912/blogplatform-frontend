@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -14,7 +15,12 @@ import AdminPanel from "./pages/AdminPanel";
 import Categories from "./pages/Categories";
 import Dashboard from "./pages/Dashboard";
 
+
 function App() {
+  useEffect(() => {
+    const theme = localStorage.getItem("theme") || "light";
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, []);
   return (
     <div>
       <Navbar />

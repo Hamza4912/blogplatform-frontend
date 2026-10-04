@@ -3,6 +3,9 @@ import { toast } from "react-toastify";
 import api from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 
+const inputClass =
+  "w-full px-3 py-2 text-sm rounded-md border border-amber-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500";
+
 function Categories() {
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
@@ -81,68 +84,111 @@ function Categories() {
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "50px auto" }}>
-      <h2>Manage Categories</h2>
+    <div className="max-w-2xl mx-auto px-4 py-10">
+      <h2 className="text-3xl font-serif font-bold text-stone-800 dark:text-stone-100 mb-8">
+        Manage Categories
+      </h2>
 
-      <form onSubmit={handleCreate}>
+      <form
+        onSubmit={handleCreate}
+        className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-6 mb-10 space-y-4"
+      >
+        <h3 className="text-lg font-serif font-semibold text-stone-800 dark:text-stone-100">
+          Add Category
+        </h3>
         <input
           type="text"
           placeholder="Category name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
+          className={inputClass}
         />
-        <br />
-        <br />
         <input
           type="text"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
+          className={inputClass}
         />
-        <br />
-        <br />
-        <button type="submit">Add Category</button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        <button
+          type="submit"
+          className="px-4 py-2 text-sm font-medium text-white bg-amber-700 rounded-md hover:bg-amber-800 transition"
+        >
+          Add Category
+        </button>
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </form>
 
-      <hr />
+      <h3 className="text-lg font-serif font-semibold text-stone-800 dark:text-stone-100 mb-4">
+        All Categories
+      </h3>
 
-      {categories.map((cat) => (
-        <div
-          key={cat.id}
-          style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}
-        >
-          {editingId === cat.id ? (
-            <div>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-              />
-              <br />
-              <br />
-              <input
-                type="text"
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-              />
-              <br />
-              <br />
-              <button onClick={() => handleUpdate(cat.id)}>Save</button>
-              <button onClick={() => setEditingId(null)}>Cancel</button>
-            </div>
-          ) : (
-            <div>
-              <strong>{cat.name}</strong>
-              <p>{cat.description}</p>
-              <button onClick={() => handleEditClick(cat)}>Edit</button>
-              <button onClick={() => setDeleteTargetId(cat.id)}>Delete</button>
-            </div>
-          )}
-        </div>
-      ))}
+      <div className="space-y-3">
+        {categories.map((cat) => (
+          <div
+            key={cat.id}
+            className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-4"
+          >
+            {editingId === cat.id ? (
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className={inputClass}
+                />
+                <input
+                  type="text"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className={inputClass}
+                />
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleUpdate(cat.id)}
+                    className="px-4 py-1.5 text-sm font-medium text-white bg-amber-700 rounded-md hover:bg-amber-800 transition"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingId(null)}
+                    className="px-4 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-300 border border-amber-200 dark:border-stone-600 rounded-md hover:bg-amber-50 dark:hover:bg-stone-700 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-serif font-semibold text-stone-800 dark:text-stone-100">
+                    {cat.name}
+                  </p>
+                  <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+                    {cat.description}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => handleEditClick(cat)}
+                    className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setDeleteTargetId(cat.id)}
+                    className="text-xs font-medium text-red-500 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
 
       <ConfirmModal
         show={deleteTargetId !== null}

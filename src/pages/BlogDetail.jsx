@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import DOMPurify from "dompurify";
 import api from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
-import DOMPurify from "dompurify";
 
 function BlogDetail() {
   const { id } = useParams();
@@ -112,92 +112,165 @@ function BlogDetail() {
   };
 
   const handleLikeToggle = async () => {
-    try {
-      if (liked) {
-        await api.delete(`/Blog/${id}/like`);
-        setLikesCount(likesCount - 1);
-        setLiked(false);
-      } else {
-        await api.post(`/Blog/${id}/like`);
-        setLikesCount(likesCount + 1);
-        setLiked(true);
-      }
-    } catch (err) {
-      console.error(err);
+  try {
+    if (liked) {
+      await api.delete(`/Blog/${id}/like`);
+      setLikesCount(likesCount - 1);
+      setLiked(false);
+    } else {
+      await api.post(`/Blog/${id}/like`);
+      setLikesCount(likesCount + 1);
+      setLiked(true);
+    }
+  } catch (err) {
+    console.error(err);
+    const message = err.response?.data?.message || "";
+
+    if (message.includes("already liked")) {
+      setLiked(true);
+      toast.info("You've already liked this blog.");
+    } else if (message.includes("not liked")) {
+      setLiked(false);
+      toast.info("You haven't liked this blog yet.");
+    } else {
       toast.error("Something went wrong while liking/unliking.");
     }
-  };
+  }
+};
 
-  if (!blog) return <p>Loading...</p>;
+  if (!blog) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <p className="text-stone-500 dark:text-stone-400">Loading...</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "50px auto" }}>
-      <h2>{blog.title}</h2>
-      <div
+    <div className="max-w-3xl mx-auto px-4 py-10">
+      <article className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-8 mb-8">
+        <span className="inline-block text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-stone-700 px-2 py-0.5 rounded-full mb-4">
+          {blog.categoryName}
+        </span>
+
+        <h1 className="text-3xl font-serif font-bold text-stone-800 dark:text-stone-100 mb-2">
+          {blog.title}
+        </h1>
+<p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
+  By {blog.authorName} ·{" "}
+  {new Date(blog.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })}
+</p>
+
+        <div
+  className="prose prose-stone dark:prose-invert max-w-none mb-6 text-stone-700 dark:text-stone-300"
   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
 />
-      <small>
-        By {blog.authorName} in {blog.categoryName}
-      </small>
-      <br />
-      <button onClick={handleLikeToggle}>
-        {liked ? "Unlike" : "Like"} ({likesCount})
-      </button>
 
-      <hr />
-
-      <h3>Comments</h3>
-      {comments.length === 0 && <p>No comments yet.</p>}
-      {comments.map((comment) => (
-        <div
-          key={comment.id}
-          style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}
+        <button
+          onClick={handleLikeToggle}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition ${
+            liked
+              ? "bg-amber-700 text-white hover:bg-amber-800"
+              : "bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-stone-700 dark:text-amber-400 dark:hover:bg-stone-600"
+          }`}
         >
-          <strong>{comment.authorName}</strong>
+          {liked ? "♥ Liked" : "♡ Like"} ({likesCount})
+        </button>
+      </article>
 
-          {editingId === comment.id ? (
-            <div>
-              <textarea
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                style={{ width: "100%" }}
-                rows="2"
-              />
-              <br />
-              <button onClick={() => handleUpdateComment(comment.id)}>
-                Save
-              </button>
-              <button onClick={() => setEditingId(null)}>Cancel</button>
-            </div>
-          ) : (
-            <div>
-              <p>{comment.text}</p>
-              {currentUserId === comment.userId && (
-                <button onClick={() => handleEditClick(comment)}>Edit</button>
+      <div className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-8">
+        <h3 className="text-lg font-serif font-semibold text-stone-800 dark:text-stone-100 mb-4">
+          Comments ({comments.length})
+        </h3>
+
+        {comments.length === 0 && (
+          <p className="text-sm text-stone-400 dark:text-stone-500 mb-6">No comments yet.</p>
+        )}
+
+        <div className="space-y-4 mb-6">
+          {comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="border-b border-amber-100 dark:border-stone-700 pb-4"
+            >
+              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100 mb-1">
+                {comment.authorName}
+              </p>
+
+              {editingId === comment.id ? (
+                <div>
+                  <textarea
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    rows="2"
+                  />
+                  <div className="flex gap-3 mt-2">
+                    <button
+                      onClick={() => handleUpdateComment(comment.id)}
+                      className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:underline"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="text-xs font-medium text-stone-500 dark:text-stone-400 hover:underline"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-stone-600 dark:text-stone-300 mb-2">
+                    {comment.text}
+                  </p>
+                  <div className="flex gap-3">
+                    {currentUserId === comment.userId && (
+                      <button
+                        onClick={() => handleEditClick(comment)}
+                        className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:underline"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {(currentUserId === comment.userId || role === "Admin") && (
+                      <button
+                        onClick={() => setDeleteTargetId(comment.id)}
+                        className="text-xs font-medium text-red-500 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
-              {(currentUserId === comment.userId || role === "Admin") && (
-                <button onClick={() => setDeleteTargetId(comment.id)}>
-                  Delete
-                </button>
-              )}
             </div>
-          )}
+          ))}
         </div>
-      ))}
 
-      <form onSubmit={handleCommentSubmit}>
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
-          style={{ width: "100%" }}
-          rows="3"
-          required
-        />
-        <br />
-        <button type="submit">Post Comment</button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </form>
+        <form onSubmit={handleCommentSubmit}>
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Write a comment..."
+            className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+            rows="3"
+            required
+          />
+          <button
+            type="submit"
+            className="mt-3 px-5 py-2 bg-amber-700 text-white text-sm font-medium rounded-md hover:bg-amber-800 transition"
+          >
+            Post Comment
+          </button>
+          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+        </form>
+      </div>
 
       <ConfirmModal
         show={deleteTargetId !== null}

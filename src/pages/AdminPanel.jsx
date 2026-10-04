@@ -62,6 +62,7 @@ function AdminPanel() {
 
   const confirmDeactivate = async () => {
     const userId = deactivateTargetId;
+
     setDeactivateTargetId(null);
 
     try {
@@ -100,95 +101,146 @@ function AdminPanel() {
   };
 
   return (
-    <div style={{ maxWidth: "800px", margin: "50px auto" }}>
-      <h2>Admin Panel</h2>
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      <h2 className="text-3xl font-serif font-bold text-stone-800 dark:text-stone-100 mb-8">
+        Admin Panel
+      </h2>
 
       {stats && (
-        <div style={{ display: "flex", gap: "20px", marginBottom: "30px", flexWrap: "wrap" }}>
-          <div style={{ border: "1px solid #ccc", padding: "10px 20px" }}>
-            Total Users: {stats.totalUsers}
-          </div>
-          <div style={{ border: "1px solid #ccc", padding: "10px 20px" }}>
-            Active: {stats.activeUsers}
-          </div>
-          <div style={{ border: "1px solid #ccc", padding: "10px 20px" }}>
-            Deactivated: {stats.deactivatedUsers}
-          </div>
-          <div style={{ border: "1px solid #ccc", padding: "10px 20px" }}>
-            Total Blogs: {stats.totalBlogs}
-          </div>
-          <div style={{ border: "1px solid #ccc", padding: "10px 20px" }}>
-            Total Comments: {stats.totalComments}
-          </div>
-          <div style={{ border: "1px solid #ccc", padding: "10px 20px" }}>
-            Total Likes: {stats.totalLikes}
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+          {[
+            { label: "Total Users", value: stats.totalUsers },
+            { label: "Active", value: stats.activeUsers },
+            { label: "Deactivated", value: stats.deactivatedUsers },
+            { label: "Blogs", value: stats.totalBlogs },
+            { label: "Comments", value: stats.totalComments },
+            { label: "Likes", value: stats.totalLikes },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-4 text-center"
+            >
+              <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                {item.value}
+              </p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                {item.label}
+              </p>
+            </div>
+          ))}
         </div>
       )}
 
-      <h3>Users</h3>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      <h3 className="text-lg font-serif font-semibold text-stone-800 dark:text-stone-100 mb-4">
+        Users
+      </h3>
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px" }}>
-        <thead>
-          <tr>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Username</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Email</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Role</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Status</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>{user.username}</td>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>{user.email}</td>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>{user.role}</td>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>
-                {user.isActive ? "Active" : "Deactivated"}
-              </td>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>
-                {user.role === "Admin" ? (
-                  <button onClick={() => handleRoleChange(user.id, "User")}>
-                    Make User
-                  </button>
-                ) : (
-                  <button onClick={() => handleRoleChange(user.id, "Admin")}>
-                    Make Admin
-                  </button>
-                )}
-                {" "}
-                {user.isActive ? (
-                  <button onClick={() => setDeactivateTargetId(user.id)}>
-                    Deactivate
-                  </button>
-                ) : (
-                  <button onClick={() => handleActivate(user.id)}>
-                    Activate
-                  </button>
-                )}
-              </td>
+      <div className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm overflow-x-auto mb-10">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-amber-50 dark:bg-stone-700 text-left text-stone-600 dark:text-stone-300">
+              <th className="px-4 py-3 font-medium">Username</th>
+              <th className="px-4 py-3 font-medium">Email</th>
+              <th className="px-4 py-3 font-medium">Role</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr
+                key={user.id}
+                className="border-t border-amber-100 dark:border-stone-700 text-stone-700 dark:text-stone-300"
+              >
+                <td className="px-4 py-3">{user.username}</td>
+                <td className="px-4 py-3">{user.email}</td>
+                <td className="px-4 py-3">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 dark:bg-stone-700 text-amber-700 dark:text-amber-400">
+                    {user.role}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      user.isActive
+                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                        : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                    }`}
+                  >
+                    {user.isActive ? "Active" : "Deactivated"}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-4">
+                    {user.role === "Admin" ? (
+                      <button
+                        onClick={() => handleRoleChange(user.id, "User")}
+                        className="w-20 text-left text-xs font-medium text-amber-700 dark:text-amber-400 hover:underline"
+                      >
+                        Make User
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleRoleChange(user.id, "Admin")}
+                        className="w-20 text-left text-xs font-medium text-amber-700 dark:text-amber-400 hover:underline"
+                      >
+                        Make Admin
+                      </button>
+                    )}
+                    {user.isActive ? (
+                      <button
+                        onClick={() => setDeactivateTargetId(user.id)}
+                        className="text-xs font-medium text-red-500 hover:underline"
+                      >
+                        Deactivate
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleActivate(user.id)}
+                        className="text-xs font-medium text-green-600 hover:underline"
+                      >
+                        Activate
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      <h3>All Blogs</h3>
-      {blogs.map((blog) => (
-        <div
-          key={blog.id}
-          style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}
-        >
-          <strong>
-            <Link to={`/blog/${blog.id}`}>{blog.title}</Link>
-          </strong>
-          <br />
-          <small>By {blog.authorName} in {blog.categoryName}</small>
-          <br />
-          <button onClick={() => setDeleteBlogTargetId(blog.id)}>Delete</button>
-        </div>
-      ))}
+      <h3 className="text-lg font-serif font-semibold text-stone-800 dark:text-stone-100 mb-4">
+        All Blogs
+      </h3>
+
+      <div className="space-y-3">
+        {blogs.map((blog) => (
+          <div
+            key={blog.id}
+            className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-4 flex items-center justify-between"
+          >
+            <div>
+              <Link
+                to={`/blog/${blog.id}`}
+                className="font-serif font-semibold text-stone-800 dark:text-stone-100 hover:text-amber-700 dark:hover:text-amber-400 transition"
+              >
+                {blog.title}
+              </Link>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                By {blog.authorName} in {blog.categoryName}
+              </p>
+            </div>
+            <button
+              onClick={() => setDeleteBlogTargetId(blog.id)}
+              className="text-xs font-medium text-red-500 hover:underline"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
 
       <ConfirmModal
         show={deactivateTargetId !== null}

@@ -39,7 +39,7 @@ function ConfirmModal({ show, message, onConfirm, onCancel }) {
             cursor: "pointer",
           }}
         >
-          Yes, Delete
+          Yes
         </button>
         <button
           onClick={onCancel}

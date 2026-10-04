@@ -1,4 +1,7 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
-  margin: 0;
-  font-family: sans-serif;
+  @apply bg-amber-50 dark:bg-stone-900 transition-colors;
 }
