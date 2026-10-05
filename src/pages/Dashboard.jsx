@@ -104,10 +104,10 @@ function Dashboard() {
 
       <div className="space-y-4">
         {myBlogs.map((blog) => (
-          <div
-            key={blog.id}
-            className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-5"
-          >
+         <div
+  key={blog.id}
+  className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-5 overflow-hidden"
+>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h4 className="text-lg font-serif font-semibold text-stone-800 dark:text-stone-100 mb-1">
@@ -115,10 +115,10 @@ function Dashboard() {
                     {blog.title}
                   </Link>
                 </h4>
-                <div
-                  className="text-sm text-stone-500 dark:text-stone-400 line-clamp-2 mb-2"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
-                />
+               <div
+  className="text-sm text-stone-600 dark:text-stone-400 line-clamp-3 mb-4 flex-1"
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
+/>
                 <p className="text-xs text-stone-400 dark:text-stone-500">
                   {blog.likesCount} likes · {blog.commentsCount} comments · {blog.categoryName}
                 </p>

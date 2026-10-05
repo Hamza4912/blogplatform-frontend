@@ -124,9 +124,9 @@ function BlogList() {
             </h3>
 
             <div
-              className="text-sm text-stone-600 dark:text-stone-400 line-clamp-3 mb-4 flex-1"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
-            />
+  className="text-sm text-stone-600 dark:text-stone-400 line-clamp-3 mb-4 flex-1 break-words"
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
+/>
 
             <p className="text-xs text-stone-400 dark:text-stone-500 mb-3">
   By {blog.authorName} ·{" "}
