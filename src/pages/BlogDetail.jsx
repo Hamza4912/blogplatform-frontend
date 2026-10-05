@@ -148,7 +148,7 @@ function BlogDetail() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-      <article className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-8 mb-8">
+      <article className="bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-xl shadow-sm p-8 mb-8 overflow-hidden">
         <span className="inline-block text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-stone-700 px-2 py-0.5 rounded-full mb-4">
           {blog.categoryName}
         </span>
@@ -166,7 +166,7 @@ function BlogDetail() {
 </p>
 
         <div
-  className="prose prose-stone dark:prose-invert max-w-none mb-6 text-stone-700 dark:text-stone-300"
+  className="prose prose-stone dark:prose-invert max-w-none mb-6 text-stone-700 dark:text-stone-300 break-words"
   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
 />
 
